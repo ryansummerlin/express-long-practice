@@ -1,12 +1,17 @@
 const express = require('express');
 const app = express();
 
+const dogsRouter = require('./routes/dogs');
+
+app.use('/dogs', dogsRouter);
+
 app.use(express.json());
 
 app.use('/static', express.static('assets'));
 
 const logger = (req, res, next) => {
   console.log({ method: req.method, URL: req.url });
+  res.on('finish', () => console.log(res.statusCode));
   next();
 }
 
@@ -31,7 +36,14 @@ app.get('/test-error', async (req, res, next) => {
   next(e);
 });
 
+app.get('/*', (req, res, next) => {
+  let e = new Error(`The requested resource couldn't be found`);
+  e.statusCode = 404;
+  next(e);
+});
+
 app.use((err, req, res, next) => {
+  res.status(err.statusCode || 500);
   res.send(`Error: ${err.message}`);
 });
 
