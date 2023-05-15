@@ -1,4 +1,8 @@
 const express = require('express');
+
+require('dotenv').config();
+const NODE_ENV = process.env.NODE_ENV;
+
 const app = express();
 
 const dogsRouter = require('./routes/dogs');
@@ -42,9 +46,22 @@ app.get('/*', (req, res, next) => {
   next(e);
 });
 
+// app.use((err, req, res, next) => {
+//   res.status(err.statusCode || 500);
+//   res.send(`Error: ${err.message}`);
+// });
+
 app.use((err, req, res, next) => {
-  res.status(err.statusCode || 500);
-  res.send(`Error: ${err.message}`);
+  console.log(err);
+  const status = err.statusCode || 500;
+  const message = err.message || "Something went wrong";
+  const stack = err.stack;
+  res.status(status);
+  if (NODE_ENV === "production") {
+    res.json({ message: message, statusCode: status});
+  } else {
+    res.json({ message: message, statusCode: status, stack: stack });
+  }
 });
 
 const port = 5001;
