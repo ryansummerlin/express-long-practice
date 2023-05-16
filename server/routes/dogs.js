@@ -88,6 +88,10 @@ const express = require('express');
 
 const router = express.Router();
 
+const dogFoodsRouter = require('./dog-foods');
+
+router.use('/:dogId/foods', validateDogId, dogFoodsRouter);
+
 router.get('/', (req, res) => {
   getAllDogs(req, res);
 });
